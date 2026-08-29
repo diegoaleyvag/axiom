@@ -1,13 +1,46 @@
 # Axiom
 
-Axiom validates structured AI outputs as software contracts, offline and provider-neutral.
+**FIVE DECISIONS / APPLIED AI**
 
-It compiles one declarative `axiom.config.yaml` into schema, invariant, and policy checks
-against recorded artifacts or a locally-run command, runs a single deterministic evaluation
-engine shared by a local CLI and a bundled GitHub Action, and produces a value-free,
-schema-versioned JSON/Markdown report with exact fractional metrics and stable finding codes.
-There is no provider SDK, no network access, and no telemetry: everything Axiom does is a pure
-function of the config and the input you point it at.
+## Can an AI output keep its contract?
+
+Axiom is an offline, provider-neutral contract checker for structured AI outputs. It turns one
+declarative `axiom.config.yaml` into schema, invariant, and policy checks, then returns a
+deterministic, value-free JSON or Markdown report.
+
+The decision is simple: can this output satisfy the contract, and did it regress against the
+baseline? Axiom does not call a model, require a token, send telemetry, or make a network call
+in normal operation.
+
+## Start with the decision
+
+From the repository root:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+node packages/cli/dist/index.js check --config examples/greenhouse-inspection/axiom.config.yaml
+node packages/cli/dist/index.js compare --config examples/greenhouse-inspection/axiom.config.yaml
+```
+
+The greenhouse-inspection corpus is intentionally mixed. Both `check` and `compare` should
+report a contract failure and exit `1`; that failure is the evidence that the checker found the
+documented violations and baseline regression. See the
+[failure walkthrough](docs/failure-examples.md) and the committed
+[check](examples/greenhouse-inspection/evidence/check-report.md) and
+[compare](examples/greenhouse-inspection/evidence/compare-report.md) reports.
+
+For a passing scratch project, build Axiom once, then run the built CLI from that project:
+
+```bash
+mkdir axiom-scratch
+cd axiom-scratch
+node /absolute/path/to/axiom/packages/cli/dist/index.js init
+node /absolute/path/to/axiom/packages/cli/dist/index.js check
+```
+
+`init` writes a no-clobber starter config, contract schema, and passing example artifact.
+`check` writes `.axiom/reports/current.{json,md}`.
 
 - **Deterministic.** The same config and input always produce byte-identical reports. Metrics
   are exact integer numerator/denominator pairs, compared by cross-multiplication or fixed
@@ -36,50 +69,28 @@ See [`docs/threat-model.md`](docs/threat-model.md), [`docs/configuration.md`](do
 - [pnpm](https://pnpm.io/) `11.18.0` (pinned in [`package.json`](package.json)'s
   `packageManager` field)
 
-## Install and build
+## CLI surface
 
-```bash
-pnpm install --frozen-lockfile
-pnpm build
-```
-
-`pnpm build` compiles every workspace package (`tsc --build`, using TypeScript project
-references) to each package's `dist/`. The `axiom` CLI binary lives at
-[`packages/cli/dist/index.js`](packages/cli/package.json) once built.
-
-## CLI quickstart
-
-```bash
-# From an empty scratch directory:
-node /path/to/axiom-foundation/packages/cli/dist/index.js init
-# -> writes axiom.config.yaml, contracts/example.schema.json, cases/example.json
-
-node /path/to/axiom-foundation/packages/cli/dist/index.js check
-# -> axiom: pass (exit 0)
-# -> writes .axiom/reports/current.{json,md}
-```
-
-Or, from within this workspace, run any command straight off the built dist:
-
-```bash
-node packages/cli/dist/index.js --help
-```
+`pnpm build` compiles every workspace package with TypeScript project references. The built
+binary is [`packages/cli/dist/index.js`](packages/cli/package.json).
 
 `axiom` has four commands:
 
-| Command                                           | What it does                                                                                                                                                        |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `axiom init [configPath]`                         | Writes a minimal, schema-valid starter config, contract schema, and one passing example artifact. No-clobber: an existing target is exit `2`.                       |
-| `axiom check [--config path] [--allow-command]`   | Compiles the config, evaluates the current input, writes the configured JSON/Markdown reports, and returns the decision code.                                       |
-| `axiom compare [--config path] [--allow-command]` | Evaluates current input and compares it against the configured baseline report using the same engine, enforcing population compatibility and regression thresholds. |
-| `axiom report --report path [--config path]`      | Validates, defensively redacts, and re-renders an existing canonical report, mirroring its decision without rereading candidate artifacts.                          |
+1. `axiom init [configPath]` writes a schema-valid starter config, contract schema, and passing
+   example artifact. It never clobbers an existing target, which is exit `2`.
+2. `axiom check [--config path] [--allow-command]` evaluates the current input and writes the
+   configured JSON and Markdown reports.
+3. `axiom compare [--config path] [--allow-command]` evaluates the current input and compares it
+   with the configured baseline using exact metrics and population compatibility.
+4. `axiom report --report path [--config path]` revalidates, redacts, and re-renders an existing
+   report without rereading candidate artifacts.
 
-Exit codes are always exactly one of `0` (pass), `1` (a contract/quality/regression finding),
-`2` (invalid configuration/invocation/input envelope/schema), or `3` (I/O, spawn, timeout,
-overflow, or another unexpected tooling failure) -- see
-[`docs/taxonomy-and-exit-codes.md`](docs/taxonomy-and-exit-codes.md).
+Every invocation resolves to one of four codes: `0` pass, `1` contract or quality finding,
+`2` invalid configuration, invocation, input envelope, or schema, and `3` I/O, spawn, timeout,
+overflow, or unexpected tooling failure. See the
+[exit-code taxonomy](docs/taxonomy-and-exit-codes.md).
 
-A minimal `axiom.config.yaml`:
+### Minimal recorded-artifact config
 
 ```yaml
 version: 1
@@ -101,44 +112,92 @@ reports:
   markdown: .axiom/reports/current.md
 ```
 
-See [`examples/greenhouse-inspection`](examples/greenhouse-inspection) for a complete,
-original, wholly fictional acceptance corpus exercising schema, invariant, forbidden-path/
-pattern policy, retries, and baseline comparison end to end, with committed evidence.
+See the complete, wholly fictional
+[greenhouse-inspection corpus](examples/greenhouse-inspection) for schema, invariant,
+forbidden-path and pattern policy, retry, and baseline evidence.
 
-## GitHub Action quickstart
+## GitHub Action, locally checked out
 
-The Action is a thin adapter over the exact same engine: no token, no provider SDK, no network
-access.
+The Action is a thin adapter over the same engine. The repository-relative example below is
+runnable after checkout and intentionally exercises the failing greenhouse corpus. It uses
+`continue-on-error` so a discovered contract failure can be inspected in the next step.
 
 ```yaml
-- uses: ./ # or a pinned ref once this repository is published
-  with:
-    config-path: axiom.config.yaml
-    mode: check # or "compare"
-    allow-command: 'false' # explicit consent required for a command-source check
-outputs:
-  status: pass | fail | error
-  exit-code: '0' | '1' | '2' | '3' # the full decision; the process itself only exits 0/1
-  report-json-path: absolute path to the written JSON report
-  report-markdown-path: absolute path to the written Markdown report
+name: Check structured output
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  axiom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Axiom check
+        id: axiom
+        uses: ./
+        continue-on-error: true
+        with:
+          config-path: examples/greenhouse-inspection/axiom.config.yaml
+          mode: check
+          allow-command: 'false'
+      - name: Inspect the decision
+        if: always()
+        env:
+          STATUS: ${{ steps.axiom.outputs.status }}
+          EXIT_CODE: ${{ steps.axiom.outputs.exit-code }}
+          REPORT_JSON: ${{ steps.axiom.outputs.report-json-path }}
+        run: |
+          printf 'status=%s exit-code=%s report=%s\n' "$STATUS" "$EXIT_CODE" "$REPORT_JSON"
+          test "$STATUS" = "fail"
+          test "$EXIT_CODE" = "1"
 ```
 
-See [`action.yml`](action.yml) for the complete input/output reference and
-[`.github/workflows/axiom-example.yml`](.github/workflows/axiom-example.yml) for a
-runnable, secret-free example against the committed greenhouse-inspection fixtures.
+The Action's `status` output is `pass`, `fail`, or `error`. Its `exit-code` output preserves the
+full Axiom decision (`0`, `1`, `2`, or `3`), while the Action process itself only has the
+GitHub Actions success/failure convention. `allow-command` must remain explicit consent for a
+configured command source. See [`action.yml`](action.yml) for the complete input/output
+reference and [the example workflow](.github/workflows/axiom-example.yml) for both expected
+failure paths. This repository does not claim a published package, tag, release, or Marketplace
+listing.
 
-## Development
+## Reports, evidence, and methodology
+
+Axiom evaluates two source kinds:
+
+- **Artifacts** are already-recorded files on disk, either a raw candidate or an ordered
+  attempt envelope.
+- **Commands** provide captured stdout from one explicitly consented local executable. Command
+  execution is bounded, but it is not a sandbox.
+
+The evaluation order is JSON decode, schema, invariant, and policy. The resulting report carries
+stable codes, safe pointers, exact integer metrics, and no candidate values or captured output.
+The [threat model](docs/threat-model.md), [report format](docs/report-format.md), and
+[architecture records](docs/adr/) explain those boundaries. The [vendored Five Decisions
+contract snapshot](docs/assets/five-decisions-contract.md) records the frozen brand version and
+hashes used by this documentation adapter.
+
+## Development and release readiness
+
+Run the full local gate from the repository root:
 
 ```bash
-pnpm format:check          # prettier --check .
-pnpm typecheck             # tsc --build (also emits dist/, identical to "build")
-pnpm test                  # vitest run: unit, property-based, CLI/Action subprocess E2E
-pnpm build                 # tsc --build
-pnpm build:action-bundle   # rebuild dist/action/index.cjs (esbuild, deterministic)
-pnpm action:bundle:check   # fail if the committed Action bundle is stale
-pnpm examples:evidence:check  # fail if committed example evidence is stale
+pnpm install --frozen-lockfile
+pnpm format:check
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm action:bundle:check
+pnpm examples:evidence:check
+node packages/cli/dist/index.js check --config examples/greenhouse-inspection/axiom.config.yaml
+node packages/cli/dist/index.js compare --config examples/greenhouse-inspection/axiom.config.yaml
 ```
 
-See [`docs/`](docs) for design docs and [`docs/adr/`](docs/adr) for architecture decision
-records. [`HANDOFF.md`](HANDOFF.md) lists the exact commands a reviewer should run, along with
-known limits and deferred work (most notably: no SARIF output yet).
+The final two commands are expected to exit `1` because the fixture is designed to expose
+contract findings and a baseline regression. The other gates must pass, including byte-identical
+Action bundle and example evidence checks. This is a local release-readiness gate only. No
+package, Action, tag, release, or Marketplace publication is asserted here.
+
+See [`HANDOFF.md`](HANDOFF.md) for the reviewer sequence, known limits, and deferred work.

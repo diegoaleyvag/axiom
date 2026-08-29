@@ -1,0 +1,11 @@
+{
+  "inspectionId": "INSP-0006",
+  "zone": "propagation",
+  "inspectedAt": "2026-07-01T14:05:00Z",
+  "inspector": { "name": "Dana Okafor", "badgeId": "VOL-019" },
+  "observations": [
+    { "id": "OBS-001", "location": "Bench A4", "status": "ok", "confidence": 0.95 },
+    { "id": "OBS-002", "location": "Bench A5", "status": "ok", "confidence": 0.92 }
+  ],
+  "summary": { "totalObservations": 5, "criticalCount": 0 }
+}

@@ -1,0 +1,9 @@
+{
+  "inspectionId": "INSP-0003",
+  "zone": "tropical",
+  "inspectedAt": "2026-07-01T11:30:00Z",
+  "observations": [
+    { "id": "OBS-001", "location": "Canopy Table 1", "status": "ok", "confidence": 0.93 }
+  ],
+  "summary": { "totalObservations": 1, "criticalCount": 0 }
+}

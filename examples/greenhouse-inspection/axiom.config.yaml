@@ -1,0 +1,82 @@
+# Axiom acceptance example: a wholly fictional community-greenhouse inspection extraction.
+# See ../../packages/core, ../../packages/cli, and ../../action.yml -- this config exercises
+# the full engine (schema, invariant, policy, retries, and baseline comparison) end to end
+# against committed fixtures only. No network access, no provider SDK, no secrets.
+version: 1
+
+contracts:
+  - id: greenhouse-inspection
+    schema:
+      root: contracts/greenhouse-inspection.schema.json
+    invariants:
+      - id: total-observations-match
+        assert:
+          kind: eq
+          left:
+            kind: path
+            pointer: /summary/totalObservations
+          right:
+            kind: count
+            of:
+              kind: select
+              selector: /observations/*
+    forbidden:
+      paths:
+        - id: no-internal-notes
+          selector: /inspector/internalNotes
+      patterns:
+        - id: no-secret-marker
+          selector: /observations/*/note
+          target: stringValues
+          pattern: 'AXIOM_SYNTHETIC_SECRET_[A-Za-z0-9]+'
+
+checks:
+  - id: greenhouse-primary
+    contract: greenhouse-inspection
+    source:
+      kind: artifacts
+      items:
+        - id: valid-golden
+          path: cases/01-valid-golden.json
+          format: raw
+        - id: malformed-json
+          path: cases/02-malformed-json.json
+          format: raw
+        - id: missing-required-field
+          path: cases/03-missing-required-field.json
+          format: raw
+        - id: enum-type-violation
+          path: cases/04-enum-type-violation.json
+          format: raw
+        - id: numeric-bound-violation
+          path: cases/05-numeric-bound-violation.json
+          format: raw
+        - id: count-invariant-violation
+          path: cases/06-count-invariant-violation.json
+          format: raw
+        - id: forbidden-leak
+          path: cases/07-forbidden-leak.json
+          format: raw
+  - id: greenhouse-retry
+    contract: greenhouse-inspection
+    source:
+      kind: artifacts
+      items:
+        - id: greenhouse-retry-success
+          path: cases/08-retry-success.json
+          format: envelope
+    retries:
+      maxAttempts: 3
+
+baseline:
+  report: baseline/baseline-report.json
+  population: comparable
+  thresholds:
+    - metric: finalPassRate
+      direction: max-decrease
+      amount: '0.10'
+      minDenominator: 1
+
+reports:
+  json: evidence/current.json
+  markdown: evidence/current.md

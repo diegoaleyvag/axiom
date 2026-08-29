@@ -1,0 +1,10 @@
+{
+  "inspectionId": "INSP-0005",
+  "zone": "composting",
+  "inspectedAt": "2026-07-01T13:20:00Z",
+  "inspector": { "name": "Alicia Fenwick", "badgeId": "VOL-032" },
+  "observations": [
+    { "id": "OBS-001", "location": "Bin 2", "status": "needs-repair", "confidence": 1.4 }
+  ],
+  "summary": { "totalObservations": 1, "criticalCount": 0 }
+}

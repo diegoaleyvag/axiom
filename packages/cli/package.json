@@ -1,0 +1,26 @@
+{
+  "name": "@axiom/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Axiom local CLI adapter. Translates argv/stdio to the shared core engine; implements no validation logic of its own.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "bin": {
+    "axiom": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@axiom/core": "workspace:*"
+  }
+}

@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom.invalid/schemas/axiom-config.v1.schema.json",
+  "title": "Axiom Config v1",
+  "description": "Structural validation for axiom.config.yaml. Unknown keys are rejected everywhere (additionalProperties: false throughout). The recursive invariant/policy expression grammar is deliberately NOT fully encoded here -- 'assert' is only shape-checked as an object with a string 'kind'; the closed AST grammar, and all depth/node/wildcard bounds, are enforced by packages/core/src/invariant/compile.ts. Numeric ceilings below (timeoutMs, maxStdoutBytes, maxStderrBytes, retries.maxAttempts) mirror packages/core/src/limits.ts DEFAULT_LIMITS and must be kept in sync with it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "contracts", "checks", "reports"],
+  "properties": {
+    "version": { "const": 1 },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/contract" }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "baseline": { "$ref": "#/$defs/baseline" },
+    "reports": { "$ref": "#/$defs/reports" },
+    "redaction": { "$ref": "#/$defs/redaction" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+    },
+    "configPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "patternFlags": {
+      "type": "array",
+      "items": { "enum": ["i", "m", "s"] },
+      "maxItems": 3,
+      "uniqueItems": true
+    },
+    "forbiddenPathRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "selector"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "selector": { "type": "string", "minLength": 1, "maxLength": 1024 }
+      }
+    },
+    "forbiddenPatternRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "selector", "target", "pattern"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "selector": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "target": { "enum": ["stringValues", "keys"] },
+        "pattern": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "flags": { "$ref": "#/$defs/patternFlags" }
+      }
+    },
+    "invariantRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "assert"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "assert": {
+          "type": "object",
+          "required": ["kind"],
+          "properties": {
+            "kind": { "type": "string", "maxLength": 32 }
+          }
+        }
+      }
+    },
+    "contractSchemaRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root"],
+      "properties": {
+        "root": { "$ref": "#/$defs/configPath" },
+        "resources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/configPath" },
+          "maxItems": 64
+        }
+      }
+    },
+    "forbidden": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/forbiddenPathRule" },
+          "maxItems": 128
+        },
+        "patterns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/forbiddenPatternRule" },
+          "maxItems": 128
+        }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "schema"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "schema": { "$ref": "#/$defs/contractSchemaRef" },
+        "invariants": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/invariantRule" },
+          "maxItems": 256
+        },
+        "forbidden": { "$ref": "#/$defs/forbidden" }
+      }
+    },
+    "retries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxAttempts"],
+      "properties": {
+        "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "delayMs": { "type": "integer", "minimum": 0, "maximum": 60000 }
+      }
+    },
+    "artifactSourceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "format"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "path": { "$ref": "#/$defs/configPath" },
+        "format": { "enum": ["raw", "envelope"] }
+      }
+    },
+    "artifactSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "items"],
+      "properties": {
+        "kind": { "const": "artifacts" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "items": { "$ref": "#/$defs/artifactSourceItem" }
+        }
+      }
+    },
+    "commandSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "executable", "timeoutMs", "maxStdoutBytes", "maxStderrBytes"],
+      "properties": {
+        "kind": { "const": "command" },
+        "executable": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "args": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 4096 },
+          "maxItems": 256
+        },
+        "cwd": { "$ref": "#/$defs/configPath" },
+        "timeoutMs": { "type": "integer", "minimum": 1, "maximum": 300000 },
+        "maxStdoutBytes": { "type": "integer", "minimum": 1, "maximum": 2097152 },
+        "maxStderrBytes": { "type": "integer", "minimum": 1, "maximum": 65536 },
+        "env": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$", "maxLength": 256 },
+          "maxItems": 64,
+          "uniqueItems": true
+        }
+      }
+    },
+    "source": {
+      "oneOf": [{ "$ref": "#/$defs/artifactSource" }, { "$ref": "#/$defs/commandSource" }]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "contract", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "contract": { "$ref": "#/$defs/id" },
+        "source": { "$ref": "#/$defs/source" },
+        "retries": { "$ref": "#/$defs/retries" }
+      }
+    },
+    "thresholdDirection": {
+      "enum": ["max-decrease", "max-increase", "min-value", "max-value"]
+    },
+    "metricId": {
+      "enum": [
+        "finalPassRate",
+        "firstPassRate",
+        "retryRate",
+        "jsonPassRate",
+        "schemaPassRate",
+        "invariantPassRate",
+        "policyPassRate",
+        "meanAttempts"
+      ]
+    },
+    "baselineThreshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "direction"],
+      "properties": {
+        "metric": { "$ref": "#/$defs/metricId" },
+        "direction": { "$ref": "#/$defs/thresholdDirection" },
+        "amount": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "minDenominator": { "type": "integer", "minimum": 0, "maximum": 1000000 }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report", "population", "thresholds"],
+      "properties": {
+        "report": { "$ref": "#/$defs/configPath" },
+        "population": { "enum": ["exact", "comparable"] },
+        "thresholds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/baselineThreshold" }
+        }
+      }
+    },
+    "reports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["json", "markdown"],
+      "properties": {
+        "json": { "$ref": "#/$defs/configPath" },
+        "markdown": { "$ref": "#/$defs/configPath" }
+      }
+    },
+    "redactionPatternRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "pattern"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "pattern": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "flags": { "$ref": "#/$defs/patternFlags" }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 1024 },
+          "maxItems": 128
+        },
+        "patterns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/redactionPatternRule" },
+          "maxItems": 128
+        }
+      }
+    }
+  }
+}

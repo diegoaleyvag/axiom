@@ -1,0 +1,170 @@
+{
+  "checks": [
+    {
+      "checkId": "greenhouse-primary",
+      "contractId": "greenhouse-inspection",
+      "findings": [
+        {
+          "attempt": 1,
+          "caseId": "malformed-json",
+          "category": "json",
+          "checkId": "greenhouse-primary",
+          "code": "json.invalid-json"
+        },
+        {
+          "attempt": 1,
+          "caseId": "missing-required-field",
+          "category": "schema",
+          "checkId": "greenhouse-primary",
+          "code": "schema.required",
+          "pointer": ""
+        },
+        {
+          "attempt": 1,
+          "caseId": "enum-type-violation",
+          "category": "schema",
+          "checkId": "greenhouse-primary",
+          "code": "schema.enum",
+          "pointer": "/observations/0/status"
+        },
+        {
+          "attempt": 1,
+          "caseId": "numeric-bound-violation",
+          "category": "schema",
+          "checkId": "greenhouse-primary",
+          "code": "schema.maximum",
+          "pointer": "/observations/0/confidence"
+        },
+        {
+          "attempt": 1,
+          "caseId": "count-invariant-violation",
+          "category": "invariant",
+          "checkId": "greenhouse-primary",
+          "code": "invariant.failed",
+          "ruleId": "total-observations-match"
+        },
+        {
+          "attempt": 1,
+          "caseId": "forbidden-leak",
+          "category": "policy",
+          "checkId": "greenhouse-primary",
+          "code": "policy.forbidden-path",
+          "pointer": "/inspector/internalNotes",
+          "ruleId": "no-internal-notes"
+        },
+        {
+          "attempt": 1,
+          "caseId": "forbidden-leak",
+          "category": "policy",
+          "checkId": "greenhouse-primary",
+          "code": "policy.forbidden-pattern",
+          "pointer": "/observations/*/note",
+          "ruleId": "no-secret-marker"
+        }
+      ],
+      "status": "fail"
+    },
+    {
+      "checkId": "greenhouse-retry",
+      "contractId": "greenhouse-inspection",
+      "findings": [
+        {
+          "attempt": 1,
+          "caseId": "greenhouse-retry-success",
+          "category": "schema",
+          "checkId": "greenhouse-retry",
+          "code": "schema.required",
+          "pointer": ""
+        },
+        {
+          "attempt": 2,
+          "caseId": "greenhouse-retry-success",
+          "category": "invariant",
+          "checkId": "greenhouse-retry",
+          "code": "invariant.failed",
+          "ruleId": "total-observations-match"
+        }
+      ],
+      "status": "pass"
+    }
+  ],
+  "comparison": {
+    "baselineReportPath": "baseline/baseline-report.json",
+    "population": "comparable",
+    "thresholds": [
+      {
+        "amount": "0.10",
+        "baseline": {
+          "denominator": 8,
+          "numerator": 8,
+          "value": "1.000000"
+        },
+        "current": {
+          "denominator": 8,
+          "numerator": 2,
+          "value": "0.250000"
+        },
+        "direction": "max-decrease",
+        "metric": "finalPassRate",
+        "result": "fail"
+      }
+    ]
+  },
+  "configFingerprint": "e291604d1ce7b0f5a490af2f3e3491bcc64303fd6d510d8fe144c9b9f16ebfb8",
+  "exitCode": 1,
+  "metricVersion": 1,
+  "metrics": [
+    {
+      "denominator": 8,
+      "id": "finalPassRate",
+      "numerator": 2,
+      "value": "0.250000"
+    },
+    {
+      "denominator": 8,
+      "id": "firstPassRate",
+      "numerator": 1,
+      "value": "0.125000"
+    },
+    {
+      "denominator": 8,
+      "id": "retryRate",
+      "numerator": 1,
+      "value": "0.125000"
+    },
+    {
+      "denominator": 10,
+      "id": "jsonPassRate",
+      "numerator": 9,
+      "value": "0.900000"
+    },
+    {
+      "denominator": 10,
+      "id": "schemaPassRate",
+      "numerator": 5,
+      "value": "0.500000"
+    },
+    {
+      "denominator": 10,
+      "id": "invariantPassRate",
+      "numerator": 3,
+      "value": "0.300000"
+    },
+    {
+      "denominator": 10,
+      "id": "policyPassRate",
+      "numerator": 2,
+      "value": "0.200000"
+    },
+    {
+      "denominator": 8,
+      "id": "meanAttempts",
+      "numerator": 10,
+      "value": "1.250000"
+    }
+  ],
+  "populationFingerprint": "20afc856be16de32f7c05551610199a223b824153cdabbead188690d4a476396",
+  "reportVersion": 1,
+  "status": "fail",
+  "toolVersion": "0.1.0"
+}

@@ -1,0 +1,15 @@
+{
+  "artifactVersion": 1,
+  "caseId": "greenhouse-retry-success",
+  "attempts": [
+    {
+      "content": "{\"inspectionId\":\"INSP-0008\",\"inspectedAt\":\"2026-07-01T16:00:00Z\",\"inspector\":{\"name\":\"Sam Ortiz\",\"badgeId\":\"VOL-055\"},\"observations\":[{\"id\":\"OBS-001\",\"location\":\"Compost Row 1\",\"status\":\"ok\",\"confidence\":0.9}],\"summary\":{\"totalObservations\":1,\"criticalCount\":0}}"
+    },
+    {
+      "content": "{\"inspectionId\":\"INSP-0008\",\"zone\":\"composting\",\"inspectedAt\":\"2026-07-01T16:05:00Z\",\"inspector\":{\"name\":\"Sam Ortiz\",\"badgeId\":\"VOL-055\"},\"observations\":[{\"id\":\"OBS-001\",\"location\":\"Compost Row 1\",\"status\":\"ok\",\"confidence\":0.9}],\"summary\":{\"totalObservations\":2,\"criticalCount\":0}}"
+    },
+    {
+      "content": "{\"inspectionId\":\"INSP-0008\",\"zone\":\"composting\",\"inspectedAt\":\"2026-07-01T16:10:00Z\",\"inspector\":{\"name\":\"Sam Ortiz\",\"badgeId\":\"VOL-055\"},\"observations\":[{\"id\":\"OBS-001\",\"location\":\"Compost Row 1\",\"status\":\"ok\",\"confidence\":0.9}],\"summary\":{\"totalObservations\":1,\"criticalCount\":0}}"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "collection": "five-decisions",
+  "id": "axiom",
+  "title": "Axiom",
+  "decision": "Can an AI output keep its contract?",
+  "learningOrigin": "2026-05",
+  "buildStarted": "2026-08-13",
+  "status": "building",
+  "summary": "A CI-ready contract checker for structured AI outputs.",
+  "capabilities": ["schema validation", "invariant checks", "regression reports"],
+  "evidence": [],
+  "links": {
+    "repository": null,
+    "demo": null,
+    "methodology": null
+  }
+}

@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+pnpm-lock.yaml
+*.tsbuildinfo
+
+# Deterministically machine-rendered report evidence (packages/core/src/engine/render) --
+# formatted by our own canonical renderer, not meant to be reformatted by Prettier.
+examples/*/evidence/**
+
+# Intentionally syntactically-invalid JSON fixture (the "malformed candidate JSON"
+# acceptance scenario) -- Prettier cannot parse it, by design.
+examples/greenhouse-inspection/cases/02-malformed-json.json

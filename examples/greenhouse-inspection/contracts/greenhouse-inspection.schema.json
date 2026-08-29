@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom.invalid/examples/greenhouse-inspection.schema.json",
+  "title": "Community Greenhouse Inspection Extraction",
+  "description": "A wholly fictional extraction shape for a community-greenhouse volunteer inspection report: which zone was inspected, one observation per plant bed/bench, and a summary count. Used only by examples/greenhouse-inspection -- not a real-world data format.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["inspectionId", "zone", "inspectedAt", "inspector", "observations", "summary"],
+  "properties": {
+    "inspectionId": {
+      "type": "string",
+      "pattern": "^INSP-[0-9]{4}$"
+    },
+    "zone": {
+      "enum": ["propagation", "vegetable", "tropical", "succulent", "composting"]
+    },
+    "inspectedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "inspector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "badgeId"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "badgeId": { "type": "string", "pattern": "^VOL-[0-9]{3}$" },
+        "internalNotes": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "Never populated by a legitimate extraction; forbidden by the contract's policy rules below and only exercised by the synthetic forbidden-field-leak scenario."
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "location", "status", "confidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^OBS-[0-9]{3}$" },
+          "location": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "status": {
+            "enum": ["ok", "minor-issue", "needs-repair", "critical"]
+          },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "note": { "type": "string", "maxLength": 512 }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["totalObservations", "criticalCount"],
+      "properties": {
+        "totalObservations": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "criticalCount": { "type": "integer", "minimum": 0, "maximum": 64 }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "inspectionId": "INSP-0007",
+  "zone": "vegetable",
+  "inspectedAt": "2026-07-01T15:10:00Z",
+  "inspector": {
+    "name": "Teo Marsh",
+    "badgeId": "VOL-041",
+    "internalNotes": "debug dump: AXIOM_SYNTHETIC_SECRET_9f13d2c0 must never leave this process"
+  },
+  "observations": [
+    {
+      "id": "OBS-001",
+      "location": "Row 7",
+      "status": "ok",
+      "confidence": 0.89,
+      "note": "sensor token leaked into note field: AXIOM_SYNTHETIC_SECRET_77aa21be"
+    }
+  ],
+  "summary": { "totalObservations": 1, "criticalCount": 0 }
+}

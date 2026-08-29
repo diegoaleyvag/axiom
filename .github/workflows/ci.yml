@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Provider-free: no secrets, no external services, no network calls beyond installing this
+# repository's own pinned dependencies. Full "test-document" milestone gate: format, types,
+# every test (unit, property-based, CLI subprocess E2E across all four exit codes, bundled
+# Action<->CLI parity, and the greenhouse-inspection acceptance corpus), build, Action bundle
+# freshness, and committed example-evidence regeneration.
+#
+# Ordering note: "Typecheck" is `tsc --build`, identical to "Build" -- it already emits
+# packages/*/dist before "Test" runs, which is what the CLI subprocess E2E and Action<->CLI
+# parity test files (packages/cli/src/cli.subprocess.test.ts,
+# packages/action/src/action-cli-parity.test.ts) require to exist. "Build" runs again anyway
+# so the step is meaningful in isolation (e.g. if "Typecheck" is ever changed to `--noEmit`).
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.18.0'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Action bundle freshness
+        run: pnpm action:bundle:check
+
+      - name: Example evidence regeneration
+        run: pnpm examples:evidence:check

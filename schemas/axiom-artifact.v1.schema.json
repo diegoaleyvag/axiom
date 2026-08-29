@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom.invalid/schemas/axiom-artifact.v1.schema.json",
+  "title": "Axiom Artifact Envelope v1",
+  "description": "A provider-neutral, ordered-attempts envelope for one recorded case. Each attempt's content is raw candidate output text (may be malformed JSON); a direct 'raw' source file is not an envelope at all and has no schema of its own.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifactVersion", "caseId", "attempts"],
+  "properties": {
+    "artifactVersion": {
+      "const": 1
+    },
+    "caseId": {
+      "$ref": "#/$defs/id"
+    },
+    "attempts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/attempt"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+    },
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content"],
+      "properties": {
+        "content": {
+          "type": "string",
+          "maxLength": 2097152
+        }
+      }
+    }
+  }
+}

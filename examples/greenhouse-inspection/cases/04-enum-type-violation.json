@@ -1,0 +1,10 @@
+{
+  "inspectionId": "INSP-0004",
+  "zone": "succulent",
+  "inspectedAt": "2026-07-01T12:45:00Z",
+  "inspector": { "name": "Marcus Webb", "badgeId": "VOL-007" },
+  "observations": [
+    { "id": "OBS-001", "location": "Bench C1", "status": "sunburned", "confidence": 0.76 }
+  ],
+  "summary": { "totalObservations": 1, "criticalCount": 0 }
+}

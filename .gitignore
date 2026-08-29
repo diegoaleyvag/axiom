@@ -1,0 +1,16 @@
+node_modules/
+*.tsbuildinfo
+coverage/
+.DS_Store
+*.log
+.axiom/
+
+# Per-package tsc build output -- never committed.
+packages/*/dist/
+
+# Root-level build output is scratch *except* the committed, deterministically-bundled
+# Action entrypoint (see scripts/build-action-bundle.mjs and action.yml).
+/dist/*
+!/dist/action
+/dist/action/*
+!/dist/action/index.cjs

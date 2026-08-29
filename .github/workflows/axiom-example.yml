@@ -1,0 +1,53 @@
+name: Axiom Example
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Exercises the bundled Action (./action.yml -> dist/action/index.cjs) directly against the
+# committed, wholly fictional examples/greenhouse-inspection fixtures -- no secrets, no
+# provider/token, no network access, and no artifact upload. Both steps are *expected* to
+# report a contract failure (that is the example's entire point: proving detection), so
+# each uses `continue-on-error` and a following step asserts the documented outcome instead
+# of treating "axiom found a violation" as a broken build.
+jobs:
+  greenhouse-inspection:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: axiom check (scenarios 1-8)
+        id: check
+        uses: ./
+        continue-on-error: true
+        with:
+          config-path: examples/greenhouse-inspection/axiom.config.yaml
+          mode: check
+
+      - name: Verify the documented "check" outcome
+        run: |
+          echo "status=${{ steps.check.outputs.status }}"
+          echo "exit-code=${{ steps.check.outputs.exit-code }}"
+          test "${{ steps.check.outputs.status }}" = "fail"
+          test "${{ steps.check.outputs.exit-code }}" = "1"
+
+      - name: 'axiom compare (scenario 9: baseline regression)'
+        id: compare
+        uses: ./
+        continue-on-error: true
+        with:
+          config-path: examples/greenhouse-inspection/axiom.config.yaml
+          mode: compare
+
+      - name: Verify the documented "compare" outcome
+        run: |
+          echo "status=${{ steps.compare.outputs.status }}"
+          echo "exit-code=${{ steps.compare.outputs.exit-code }}"
+          test "${{ steps.compare.outputs.status }}" = "fail"
+          test "${{ steps.compare.outputs.exit-code }}" = "1"

@@ -1,0 +1,18 @@
+{
+  "inspectionId": "INSP-0001",
+  "zone": "propagation",
+  "inspectedAt": "2026-07-01T09:15:00Z",
+  "inspector": { "name": "Jordan Ellery", "badgeId": "VOL-014" },
+  "observations": [
+    { "id": "OBS-001", "location": "Bench A1", "status": "ok", "confidence": 0.97 },
+    {
+      "id": "OBS-002",
+      "location": "Bench A2",
+      "status": "minor-issue",
+      "confidence": 0.81,
+      "note": "Slight aphid presence on tray edge."
+    },
+    { "id": "OBS-003", "location": "Bench A3", "status": "ok", "confidence": 0.9 }
+  ],
+  "summary": { "totalObservations": 3, "criticalCount": 0 }
+}

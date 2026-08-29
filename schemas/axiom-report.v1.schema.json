@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom.invalid/schemas/axiom-report.v1.schema.json",
+  "title": "Axiom Report v1",
+  "description": "The canonical, value-free report model. Findings never carry the candidate value, raw schema error data/params, or captured stdout/stderr -- only a stable code/category, a safe pointer, rule/check/case identifiers, and an attempt number.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reportVersion",
+    "metricVersion",
+    "toolVersion",
+    "status",
+    "exitCode",
+    "configFingerprint",
+    "populationFingerprint",
+    "checks",
+    "metrics"
+  ],
+  "properties": {
+    "reportVersion": { "const": 1 },
+    "metricVersion": { "const": 1 },
+    "toolVersion": { "type": "string", "maxLength": 128 },
+    "status": { "enum": ["pass", "fail", "error"] },
+    "exitCode": { "enum": [0, 1, 2, 3] },
+    "configFingerprint": { "type": "string", "maxLength": 256 },
+    "populationFingerprint": { "type": "string", "maxLength": 256 },
+    "checks": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/checkReport" }
+    },
+    "metrics": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/metric" }
+    },
+    "comparison": { "$ref": "#/$defs/comparisonReport" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+    },
+    "pointer": {
+      "type": "string",
+      "maxLength": 4096
+    },
+    "findingCategory": {
+      "enum": ["json", "schema", "invariant", "policy", "retry", "regression"]
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "category", "checkId", "caseId", "attempt"],
+      "properties": {
+        "code": { "type": "string", "maxLength": 128 },
+        "category": { "$ref": "#/$defs/findingCategory" },
+        "checkId": { "$ref": "#/$defs/id" },
+        "caseId": { "$ref": "#/$defs/id" },
+        "attempt": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "ruleId": { "$ref": "#/$defs/id" },
+        "pointer": { "$ref": "#/$defs/pointer" }
+      }
+    },
+    "checkReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "contractId", "status", "findings"],
+      "properties": {
+        "checkId": { "$ref": "#/$defs/id" },
+        "contractId": { "$ref": "#/$defs/id" },
+        "status": { "enum": ["pass", "fail"] },
+        "findings": {
+          "type": "array",
+          "maxItems": 200,
+          "items": { "$ref": "#/$defs/finding" }
+        }
+      }
+    },
+    "metricId": {
+      "enum": [
+        "finalPassRate",
+        "firstPassRate",
+        "retryRate",
+        "jsonPassRate",
+        "schemaPassRate",
+        "invariantPassRate",
+        "policyPassRate",
+        "meanAttempts"
+      ]
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "numerator", "denominator", "value"],
+      "properties": {
+        "id": { "$ref": "#/$defs/metricId" },
+        "numerator": { "type": "integer", "minimum": 0 },
+        "denominator": { "type": "integer", "minimum": 0 },
+        "value": { "type": ["string", "null"], "maxLength": 64 }
+      }
+    },
+    "thresholdDirection": {
+      "enum": ["max-decrease", "max-increase", "min-value", "max-value"]
+    },
+    "thresholdSample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator", "value"],
+      "properties": {
+        "numerator": { "type": "integer", "minimum": 0 },
+        "denominator": { "type": "integer", "minimum": 0 },
+        "value": { "type": ["string", "null"], "maxLength": 64 }
+      }
+    },
+    "comparisonThreshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "direction", "current", "baseline", "result"],
+      "properties": {
+        "metric": { "$ref": "#/$defs/metricId" },
+        "direction": { "$ref": "#/$defs/thresholdDirection" },
+        "amount": { "type": "string", "maxLength": 64 },
+        "current": { "$ref": "#/$defs/thresholdSample" },
+        "baseline": { "$ref": "#/$defs/thresholdSample" },
+        "result": { "enum": ["pass", "fail", "insufficient-data"] }
+      }
+    },
+    "comparisonReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baselineReportPath", "population", "thresholds"],
+      "properties": {
+        "baselineReportPath": { "type": "string", "maxLength": 4096 },
+        "population": { "enum": ["exact", "comparable"] },
+        "thresholds": {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/comparisonThreshold" }
+        }
+      }
+    }
+  }
+}

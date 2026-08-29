@@ -1,0 +1,50 @@
+name: 'Axiom'
+description: >-
+  Offline, provider-neutral contract validation for structured AI outputs. A thin adapter
+  over the same shared @axiom/core engine as the local `axiom` CLI: no token, no provider
+  SDK, no network access, and no I/O or validation logic beyond translating this Action's
+  inputs/outputs.
+author: 'axiom'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  config-path:
+    description: >-
+      Path to axiom.config.yaml, resolved against "working-directory".
+    required: false
+    default: 'axiom.config.yaml'
+  mode:
+    description: 'Either "check" (evaluate current input) or "compare" (evaluate and compare against the configured baseline report).'
+    required: false
+    default: 'check'
+  allow-command:
+    description: >-
+      Explicit consent to run a configured command-source check. Command execution is not a
+      sandbox; only enable this for checks whose executable and arguments you trust.
+    required: false
+    default: 'false'
+  working-directory:
+    description: 'Directory "config-path" is resolved against. Defaults to the job''s current working directory.'
+    required: false
+    default: ''
+
+outputs:
+  status:
+    description: 'The report''s overall status: "pass", "fail", or "error".'
+  exit-code:
+    description: >-
+      The full axiom decision code as a string: "0" (pass), "1" (a contract/quality/regression
+      finding), "2" (invalid configuration/invocation/input envelope/schema), or "3" (an I/O,
+      spawn, timeout, overflow, or other unexpected failure). The Action process itself only
+      ever exits 0 or 1 (GitHub Actions has no runner-level concept of 2 vs. 3); read this
+      output for the precise decision.
+  report-json-path:
+    description: 'Absolute path to the written canonical JSON report (per the config''s "reports.json").'
+  report-markdown-path:
+    description: 'Absolute path to the written canonical Markdown report (per the config''s "reports.markdown").'
+
+runs:
+  using: 'node24'
+  main: 'dist/action/index.cjs'

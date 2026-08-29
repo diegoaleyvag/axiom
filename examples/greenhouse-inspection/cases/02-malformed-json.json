@@ -1,0 +1,10 @@
+{
+  "inspectionId": "INSP-0002",
+  "zone": "vegetable",
+  "inspectedAt": "2026-07-01T10:00:00Z",
+  "inspector": { "name": "Priya Nandan", "badgeId": "VOL-021" },
+  "observations": [
+    { "id": "OBS-001", "location": "Row 3", "status": "ok", "confidence": 0.88 },
+  ]
+  "summary": { "totalObservations": 1, "criticalCount": 0 }
+}

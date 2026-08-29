@@ -1,0 +1,33 @@
+{
+  "reportVersion": 1,
+  "metricVersion": 1,
+  "toolVersion": "0.1.0",
+  "status": "pass",
+  "exitCode": 0,
+  "configFingerprint": "baseline-fixture-config-fingerprint",
+  "populationFingerprint": "baseline-fixture-population-fingerprint",
+  "checks": [
+    {
+      "checkId": "greenhouse-primary",
+      "contractId": "greenhouse-inspection",
+      "status": "pass",
+      "findings": []
+    },
+    {
+      "checkId": "greenhouse-retry",
+      "contractId": "greenhouse-inspection",
+      "status": "pass",
+      "findings": []
+    }
+  ],
+  "metrics": [
+    { "id": "finalPassRate", "numerator": 8, "denominator": 8, "value": "1.000000" },
+    { "id": "firstPassRate", "numerator": 7, "denominator": 8, "value": "0.875000" },
+    { "id": "retryRate", "numerator": 1, "denominator": 8, "value": "0.125000" },
+    { "id": "jsonPassRate", "numerator": 10, "denominator": 10, "value": "1.000000" },
+    { "id": "schemaPassRate", "numerator": 10, "denominator": 10, "value": "1.000000" },
+    { "id": "invariantPassRate", "numerator": 10, "denominator": 10, "value": "1.000000" },
+    { "id": "policyPassRate", "numerator": 10, "denominator": 10, "value": "1.000000" },
+    { "id": "meanAttempts", "numerator": 9, "denominator": 8, "value": "1.125000" }
+  ]
+}

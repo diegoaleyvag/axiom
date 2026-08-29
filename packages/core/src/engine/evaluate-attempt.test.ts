@@ -220,26 +220,35 @@ describe('evaluateAttempt: property (totality and determinism)', () => {
       .map((value) => JSON.stringify(value)),
   );
 
-  it('never throws for any bounded string content, and is fully deterministic on repeat evaluation', async () => {
-    await fc.assert(
-      fc.asyncProperty(candidateArb, async (content) => {
-        const fs = createInMemoryFileSystem({ [SCHEMA_PATH]: STRICT_SCHEMA });
-        const cache = createSchemaValidatorCache();
-        const NO_REDACTION = { pathSegments: [] };
+  // Each of the 500 runs below performs two full async evaluateAttempt calls (schema compile +
+  // validate), making this the heaviest property test in the suite; the default 5s vitest
+  // timeout is occasionally too tight on slower/shared CI runners, hence the explicit 20s one.
+  const PROPERTY_TEST_TIMEOUT_MS = 20_000;
 
-        const first = await evaluateAttempt(fs, cache, fullContract, NO_REDACTION, content);
-        const second = await evaluateAttempt(fs, cache, fullContract, NO_REDACTION, content);
+  it(
+    'never throws for any bounded string content, and is fully deterministic on repeat evaluation',
+    async () => {
+      await fc.assert(
+        fc.asyncProperty(candidateArb, async (content) => {
+          const fs = createInMemoryFileSystem({ [SCHEMA_PATH]: STRICT_SCHEMA });
+          const cache = createSchemaValidatorCache();
+          const NO_REDACTION = { pathSegments: [] };
 
-        expect(second).toEqual(first);
-        expect(first.passed).toBe(first.findings.length === 0);
-        // Every finding carries a stable code/category and never the candidate content itself.
-        for (const finding of first.findings) {
-          expect(typeof finding.code).toBe('string');
-          expect(['json', 'schema', 'invariant', 'policy']).toContain(finding.category);
-          expect(JSON.stringify(finding)).not.toContain('FORBIDDEN-marker');
-        }
-      }),
-      { numRuns: 500 },
-    );
-  });
+          const first = await evaluateAttempt(fs, cache, fullContract, NO_REDACTION, content);
+          const second = await evaluateAttempt(fs, cache, fullContract, NO_REDACTION, content);
+
+          expect(second).toEqual(first);
+          expect(first.passed).toBe(first.findings.length === 0);
+          // Every finding carries a stable code/category and never the candidate content itself.
+          for (const finding of first.findings) {
+            expect(typeof finding.code).toBe('string');
+            expect(['json', 'schema', 'invariant', 'policy']).toContain(finding.category);
+            expect(JSON.stringify(finding)).not.toContain('FORBIDDEN-marker');
+          }
+        }),
+        { numRuns: 500 },
+      );
+    },
+    PROPERTY_TEST_TIMEOUT_MS,
+  );
 });

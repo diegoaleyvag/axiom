@@ -6,7 +6,7 @@
   "decision": "Can an AI output keep its contract?",
   "learningOrigin": "2026-05",
   "buildStarted": "2026-08-13",
-  "status": "building",
+  "status": "verified",
   "summary": "A CI-ready contract checker for structured AI outputs, with offline evaluation and value-free reports.",
   "capabilities": [
     {
@@ -46,6 +46,6 @@
   "links": {
     "repository": "https://github.com/diegoaleyvag/axiom",
     "demo": null,
-    "methodology": "https://github.com/diegoaleyvag/axiom/blob/main/HANDOFF.md#five-decisions-methodology"
+    "methodology": "https://github.com/diegoaleyvag/axiom/blob/477b8660a0e7546257fe509bfe5795a65d99fed4/HANDOFF.md#five-decisions-methodology"
   }
 }

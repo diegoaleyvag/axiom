@@ -1,11 +1,30 @@
 # HANDOFF
 
-Axiom validates structured AI outputs as software contracts, offline and provider-neutral,
-via one shared evaluation engine ([`packages/core`](packages/core)) behind a local CLI
-([`packages/cli`](packages/cli)) and a bundled GitHub Action
-([`packages/action`](packages/action)). This document is for whoever reviews or continues
-this work next: how to verify it, how it is put together, and what is deliberately not done
-yet.
+**FIVE DECISIONS / APPLIED AI**
+
+Axiom answers one decision: **Can an AI output keep its contract?** It validates structured
+outputs offline and provider-neutral through one shared evaluation engine
+([`packages/core`](packages/core)), behind a local CLI ([`packages/cli`](packages/cli)) and a
+bundled GitHub Action ([`packages/action`](packages/action)). This document is for whoever
+reviews or continues this work next: how to verify it, how it is put together, and what is
+deliberately not done yet.
+
+## Five Decisions methodology
+
+The product identity frames the operating loop without replacing it:
+
+1. **Declare** a versioned contract and source in `axiom.config.yaml`.
+2. **Evaluate** recorded artifacts or an explicitly consented local command.
+3. **Decide** through JSON, schema, invariant, and policy stages.
+4. **Compare** exact metrics with a compatible baseline when requested.
+5. **Record** deterministic, value-free JSON and Markdown evidence.
+
+The canonical project identity lives in [`portfolio.project.json`](portfolio.project.json).
+Its capabilities and evidence are validated offline against the vendored portable schema in
+[`docs/assets/five-decisions-project.schema.json`](docs/assets/five-decisions-project.schema.json)
+by [`portfolio-manifest.test.ts`](packages/core/src/domain/portfolio-manifest.test.ts).
+The repository link is retained as collection metadata, `demo` remains `null`, and no package,
+tag, release, or Marketplace availability is claimed.
 
 ## How to review this repository
 
@@ -19,9 +38,9 @@ pnpm action:bundle:check       # fails if dist/action/index.cjs is stale relativ
 pnpm examples:evidence:check   # fails if examples/greenhouse-inspection/evidence is stale
 ```
 
-All six commands are wired into [`.github/workflows/ci.yml`](.github/workflows/ci.yml), in
-this order, on every push to `main` and every pull request. There is no secret and no
-network access anywhere in this pipeline.
+These six primary checks are wired into [`.github/workflows/ci.yml`](.github/workflows/ci.yml),
+in this order, on every push to `main` and every pull request. There is no secret and no network
+access anywhere in this pipeline.
 
 To see the engine actually decide something:
 
@@ -33,6 +52,14 @@ node packages/cli/dist/index.js compare --config examples/greenhouse-inspection/
 Both are _expected_ to exit `1` -- see [`docs/failure-examples.md`](docs/failure-examples.md)
 for exactly why, finding by finding. The same fixtures run through the bundled Action in
 [`.github/workflows/axiom-example.yml`](.github/workflows/axiom-example.yml).
+
+### Release-readiness boundary
+
+The repository is locally release-ready when the six primary checks above pass, the committed
+Action bundle and greenhouse evidence are byte-identical to fresh regeneration, and the two
+fixture commands above exit `1` for the documented reasons. This is a verification boundary,
+not a publication claim. There is no package, tag, release, deployed demo, or Marketplace
+listing to verify in this lane.
 
 ### Test suite map
 

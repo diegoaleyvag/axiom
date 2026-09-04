@@ -6,13 +6,46 @@
   "decision": "Can an AI output keep its contract?",
   "learningOrigin": "2026-05",
   "buildStarted": "2026-08-13",
-  "status": "building",
-  "summary": "A CI-ready contract checker for structured AI outputs.",
-  "capabilities": ["schema validation", "invariant checks", "regression reports"],
-  "evidence": [],
+  "status": "verified",
+  "summary": "A CI-ready contract checker for structured AI outputs, with offline evaluation and value-free reports.",
+  "capabilities": [
+    {
+      "label": "Schema validation",
+      "detail": "Validates structured JSON outputs against operator-authored JSON Schema contracts offline."
+    },
+    {
+      "label": "Invariant and policy checks",
+      "detail": "Applies bounded declarative rules for cross-field invariants and forbidden paths or patterns."
+    },
+    {
+      "label": "Exact comparison",
+      "detail": "Compares a current report with a baseline using exact fractions and population compatibility."
+    },
+    {
+      "label": "Value-free reports",
+      "detail": "Produces deterministic JSON and Markdown reports with stable findings, pointers, and metrics."
+    }
+  ],
+  "evidence": [
+    {
+      "type": "acceptance corpus",
+      "description": "Committed greenhouse-inspection fixtures exercise schema, invariant, policy, retry, and baseline outcomes.",
+      "reference": "examples/greenhouse-inspection/evidence/"
+    },
+    {
+      "type": "manifest validation",
+      "description": "The canonical project manifest is checked offline with the vendored Five Decisions schema and existing Ajv factory.",
+      "reference": "packages/core/src/domain/portfolio-manifest.test.ts"
+    },
+    {
+      "type": "methodology",
+      "description": "Review guidance documents the shared engine, safety boundaries, deterministic reports, and release-readiness limits.",
+      "reference": "HANDOFF.md#five-decisions-methodology"
+    }
+  ],
   "links": {
     "repository": "https://github.com/diegoaleyvag/axiom",
     "demo": null,
-    "methodology": null
+    "methodology": "https://github.com/diegoaleyvag/axiom/blob/477b8660a0e7546257fe509bfe5795a65d99fed4/HANDOFF.md#five-decisions-methodology"
   }
 }
